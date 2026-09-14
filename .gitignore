@@ -13,6 +13,9 @@ __pycache__/
 *.rar
 *.7z
 
+# 大文件权重(走 Release Assets 分发, 不入仓库)
+GrainNuber.onnx
+
 # 输出结果
 labeled/
 per_panicle/
