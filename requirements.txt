@@ -1,0 +1,5 @@
+# 运行依赖
+onnxruntime>=1.30.0
+opencv-python>=4.8
+numpy>=1.24
+# GUI 用 tkinter(标准库自带, 无需安装)
