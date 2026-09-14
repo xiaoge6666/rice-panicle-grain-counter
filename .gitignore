@@ -1,0 +1,20 @@
+# 构建产物
+build/
+dist/
+_internal/
+*.exe
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 打包文件
+*.zip
+*.rar
+*.7z
+
+# 输出结果
+labeled/
+per_panicle/
+结果/
+*.log
