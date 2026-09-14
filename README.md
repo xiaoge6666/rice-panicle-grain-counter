@@ -44,7 +44,8 @@
 
 ```bash
 pip install -r requirements.txt
-# GrainNuber.onnx 已包含在本仓库
+# 模型权重下载: GitHub Releases Assets 里下载 GrainNuber.onnx 放到本目录
+# (exe 用户无需下载, 模型已内嵌)
 python panicle_app.py                     # GUI
 python panicle_app.py --cli 输入 输出 0.5 # CLI
 ```
@@ -74,10 +75,11 @@ pyinstaller panicle_app.spec --noconfirm
 ├─ panicle_app.py      # 主程序（GUI + CLI + 分穗 + 主流程）
 ├─ eopt_count.py       # YOLOv8 ONNX 推理类（改造自 EOPT ui2pyshow1014.py）
 ├─ panicle_app.spec    # PyInstaller 打包配置
-├─ GrainNuber.onnx     # EOPT 官方权重（43MB，源码复现必需）
 ├─ requirements.txt    # 运行依赖
 └─ README.md
 ```
+
+> `GrainNuber.onnx`（43MB，EOPT 官方权重）在 **GitHub Releases Assets** 下载：<https://github.com/xiaoge6666/rice-panicle-grain-counter/releases>。exe 免安装版已内置模型，无需单独下载。
 
 ## ⚖️ License
 
