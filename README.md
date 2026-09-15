@@ -7,11 +7,14 @@
 **本项目为开源项目 EOPT 的改造与封装**，核心深度学习模型与推理代码源自：
 
 - **原始开源项目**: [SUNJHZAU/EOPT](https://github.com/SUNJHZAU/EOPT)
-- **原论文**: *High-throughput and separating-free phenotyping method for on-panicle rice grains based on deep learning*, Plant Phenomics (2024), DOI: [10.34133/PlantPhenomics.0030](https://doi.org/10.34133/PlantPhenomics.0030), PMC: [PMC11292034](https://pmc.ncbi.nlm.nih.gov/articles/PMC11292034/)
-- **模型**: EOPT 作者发布的官方 YOLOv8 单类谷粒检测权重 `GrainNuber.onnx`（计数准确率 93.57%，论文报告）
+- **原论文 (EOPT)**: Sun J, Ren Z, Cui J, Tang C, Luo T, Yang W, Song P. *A High-Throughput Method for Accurate Extraction of Intact Rice Panicle Traits*. **Plant Phenomics**, 2024, 6:0213. DOI: [10.34133/plantphenomics.0213](https://doi.org/10.34133/plantphenomics.0213) | PMID: 39091338 | PMC: [PMC11292034](https://pmc.ncbi.nlm.nih.gov/articles/PMC11292034/)
+  - 论文方法 = 谷粒检测模型 + **PMI（穗形指数，Panicle Morphology Index）遮挡校正**；最终粒数 `Ngrain = Npredict / PMI`
+  - 论文报告（验证集 1554 张穗图）：粒数准确率 **93.57%**（MAPE 6.62%）、粒长 96.83%、粒宽 91.56%、穗长 97.13%
+- **相关前序论文**: Lu Y, Wang J, Fu L, Yu L, Liu Q. *High-throughput and separating-free phenotyping method for on-panicle rice grains based on deep learning*. **Front Plant Sci**, 2023, 14:1219584. DOI: [10.3389/fpls.2023.1219584](https://doi.org/10.3389/fpls.2023.1219584) | PMC10544938
+- **模型**: EOPT 作者发布的官方谷粒检测权重 `GrainNuber.onnx`（YOLOv8 单类目标检测）
 - **推理代码**: `eopt_count.py` 修改自 EOPT 官方 `ui2pyshow1014.py` 的 YOLOv8 ONNX 推理类
 
-> ⚠️ EOPT 论文中的遮挡补偿模块（Pix2Pix）权重作者未发布，因此密集紧贴谷粒存在 10–20% 漏检——这是原作者模型本身的边界，非本封装引入。
+> ⚠️ EOPT 完整流程含 **PMI 遮挡校正**（最终粒数 = 检测粒数 ÷ PMI），但作者发布的权重包中**仅有谷粒检测模型 `GrainNuber.onnx`，未包含 PMI 校正模型**。本工具输出的是**未经校正的原始检测粒数**，故密集紧贴谷粒可能低估约 10–20%——这是原作者发布内容的边界，非本封装引入。
 
 ## 🔧 本项目的改造 (Modifications)
 
