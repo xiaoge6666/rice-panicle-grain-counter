@@ -1,23 +1,42 @@
-# 构建产物
-build/
-dist/
-_internal/
-*.exe
-
-# Python 缓存
+# 构建产物 / 大文件，一律不进仓库
 __pycache__/
 *.py[cod]
+*.pyo
 
-# 打包文件
+# Python 构建
+build/
+dist/
+*.spec.bak
+
+# 模型权重（请从 Release 下载）
+*.onnx
+data/*.onnx
+
+# 发布包 / 可执行
+*.exe
+*.apk
 *.zip
 *.rar
 *.7z
+*.tar.gz
 
-# 大文件权重(走 Release Assets 分发, 不入仓库)
-GrainNuber.onnx
+# Android 构建产物与本地配置
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+*.iml
 
-# 输出结果
+# 运行输出
+outputs/
+results/
+*_输出/
 labeled/
-per_panicle/
-结果/
-*.log
+per_panicle*/
+*.csv.bak
+
+# 系统
+Thumbs.db
+.DS_Store

@@ -1,0 +1,48 @@
+{
+  "version": "v2-2026-09-26",
+  "detection": {
+    "conf": 0.5,
+    "iou": 0.5,
+    "input": 1280
+  },
+  "features": [
+    "n_det",
+    "med_area",
+    "r_grain_medgrain",
+    "occ_mean"
+  ],
+  "mu": [
+    63.5625,
+    2637.484375,
+    54.89911656826818,
+    7.644045805833885
+  ],
+  "sd": [
+    26.83507208493523,
+    605.7253849266768,
+    21.009635131808146,
+    0.6283039855464526
+  ],
+  "w": [
+    13.830557391944122,
+    16.033669415627227,
+    14.48897445817474,
+    -5.111484284523466
+  ],
+  "y_mean": 72.5625,
+  "lam": 3,
+  "calibration": {
+    "n_pairs": 32,
+    "loo_mape_pct": 10.63,
+    "baseline_detection_mape_pct": 12.14,
+    "nested_loo_mape_pct": 10.3,
+    "pure_detection_nested_loo_pct": 12.1,
+    "old_delivery_mape_pct": 19.6
+  },
+  "note": "k=N_true/N_pred 遮挡校正；特征来自单穗crop(20px边距)；med_area=conf>=0.3框面积中位; r_grain=谷粒像素面积/med_area; occ_mean=框覆盖重数均值; switch_threshold: 检测数<50 的穗判为无明显遮挡,直接用检测数(不校正), >=50 才用回归校正 | med_area_domain: 仅当 med_area 落在该区间(标定尺度)才应用校正,否则输出原始检测数(手机照片尺度不同会外推失真)",
+  "switch_threshold": 50,
+  "med_area_domain": [
+    1197.0,
+    4455.0
+  ]
+}
