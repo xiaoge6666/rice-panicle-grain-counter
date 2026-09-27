@@ -13,7 +13,7 @@
 ## 下载哪个
 
 - **Windows 用户** → `panicle-grain-counter-v2-windows-x64.exe`（免安装，双击即用；无需 Python、无需联网）
-- **手机用户** → `panicle-grain-counter-v2.6-android-arm64.apk`（Android 7.0+，arm64）
+- **手机用户** → `panicle-grain-counter-v2.8-android-arm64.apk`（Android 7.0+，arm64）
 - **跑源码** → 另需 `GrainNuber.onnx`，放到项目根目录或 `data/`
 
 ## 本版要点
@@ -30,7 +30,7 @@
 | 文件 | 大小 | SHA256 |
 |---|---|---|
 | `panicle-grain-counter-v2-windows-x64.exe` | 118.1 MB | `2135e22ec3d7d3a6ad57211b7fb71b72f1a706dd4569061af781e79fd0965db7` |
-| `panicle-grain-counter-v2.6-android-arm64.apk` | 46.0 MB | `3a3c675e39eeeffd7ec63c63c2dba7dac47b4d71cd8415c05da044df282e0320` |
+| `panicle-grain-counter-v2.8-android-arm64.apk` | 46.0 MB | `3a3c675e39eeeffd7ec63c63c2dba7dac47b4d71cd8415c05da044df282e0320` |
 | `GrainNuber.onnx` | 45.2 MB | `f38d671cdabc78915dc56a83782ca4b69918d62a8cbe524add3ca42a168bc55c` |
 
 ## 注意

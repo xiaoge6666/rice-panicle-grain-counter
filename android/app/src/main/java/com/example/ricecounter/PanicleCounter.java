@@ -104,6 +104,11 @@ public class PanicleCounter {
         return new float[]{s, dx, dy};
     }
 
+    // 复用缓冲区（避免每次推理重新分配 ~20MB）
+    private static java.nio.FloatBuffer BUF = null;
+    private static int[] PX = null;
+    private static float[] PLANE = null;
+
     /** 运行一次推理，返回原始框（conf>=0.05，int 截断 + iou=0.99 轻量 NMS） */
     public static List<Box> rawBoxes(OrtSession sess, OrtEnvironment env, String inputName,
                                      Bitmap crop) throws Exception {
@@ -114,25 +119,35 @@ public class PanicleCounter {
         int nw = Math.round(w * s), nh = Math.round(h * s);
 
         Bitmap rs = Bitmap.createScaledBitmap(crop, nw, nh, true);
-        int[] px = new int[nw * nh];
-        rs.getPixels(px, 0, nw, 0, 0, nw, nh);
-        java.nio.FloatBuffer buf = java.nio.FloatBuffer.allocate(3 * INPUT * INPUT);
-        // 背景填充 114/255
+        int need = nw * nh;
+        if (PX == null || PX.length < need) PX = new int[need];
+        rs.getPixels(PX, 0, nw, 0, 0, nw, nh);
+        if (rs != crop) rs.recycle();
+        final int PLANE_SZ = INPUT * INPUT;
+        if (BUF == null) BUF = java.nio.ByteBuffer.allocateDirect(3 * PLANE_SZ * 4)
+                .order(java.nio.ByteOrder.nativeOrder()).asFloatBuffer();
+        if (PLANE == null) PLANE = new float[PLANE_SZ];
         final float BG = 114f / 255f;
-        for (int i = 0; i < INPUT * INPUT; i++) { buf.put(i, BG); buf.put(INPUT * INPUT + i, BG); buf.put(2 * INPUT * INPUT + i, BG); }
+        java.util.Arrays.fill(PLANE, BG);
+        // 先清三个平面为背景色
+        BUF.clear();
+        BUF.put(PLANE); BUF.put(PLANE); BUF.put(PLANE);
+        // 逐像素写入 letterbox 区域（直接写浮点缓冲）
         for (int yy = 0; yy < nh; yy++) {
+            int base = (yy + dy) * INPUT + dx;
+            int srcRow = yy * nw;
             for (int xx = 0; xx < nw; xx++) {
-                int p = px[yy * nw + xx];
+                int p = PX[srcRow + xx];
                 int r = (p >> 16) & 0xFF, g = (p >> 8) & 0xFF, b = p & 0xFF;
-                int idx = (yy + dy) * INPUT + (xx + dx);
-                buf.put(idx, r / 255f);
-                buf.put(INPUT * INPUT + idx, g / 255f);
-                buf.put(2 * INPUT * INPUT + idx, b / 255f);
+                BUF.put(base + xx, r / 255f);
+                BUF.put(PLANE_SZ + base + xx, g / 255f);
+                BUF.put(2 * PLANE_SZ + base + xx, b / 255f);
             }
         }
 
         long[] shape = new long[]{1, 3, INPUT, INPUT};
-        OnnxTensor t = OnnxTensor.createTensor(env, buf, shape);
+        BUF.flip();   // 相对写入后翻转游标，让 ORT 能读到全部 4915200 个元素
+        OnnxTensor t = OnnxTensor.createTensor(env, BUF, shape);
         OrtSession.Result res = sess.run(Collections.singletonMap(inputName, t));
         float[][][] out = (float[][][]) res.get(0).getValue();   // [1,5,N]
         int C = out[0].length, N = out[0][0].length;

@@ -53,6 +53,7 @@ public class MainActivity extends Activity {
     private OrtEnvironment env;
     private OrtSession session;
     private PanicleCounter.Calib calib;
+    private String lastEngine = "?";
     private volatile boolean ready = false;
 
     @Override
@@ -239,6 +240,7 @@ public class MainActivity extends Activity {
 
     private void analyze(byte[] bytes) {
         OrtSession sess = null;
+        final long t0 = System.currentTimeMillis();
         try {
             // 释放上一次结果（回收在 UI 线程做，避免 ImageView 引用被回收的 Bitmap）
             final Bitmap old = annotated;
@@ -287,8 +289,8 @@ public class MainActivity extends Activity {
             }
 
             List<int[]> pans = PanicleCounter.findPanicles(src);
-            // 模型按需载入（用后立即释放，避免占内存被系统回收）
-            sess = createSession();
+            // 复用常驻会话（首次创建后才加载模型；不再每次重载）
+            sess = getSession();
             env = OrtEnvironment.getEnvironment();
             StringBuilder sb = new StringBuilder();
             if (pans.size() == 1) {
@@ -381,8 +383,11 @@ public class MainActivity extends Activity {
                 fo.write(lg.toString().getBytes("UTF-8"));
                 fo.close();
             } catch (Throwable ignore) { }
-            final String msg = String.format("%s共 %d 株穗　校正合计 %d 粒（原始检测 %d）\n%s点击下方按钮保存编号图",
-                    sb.toString(), pans.size(), total, totalRaw, detail.toString());
+            final String msg = String.format("%s共 %d 株穗　校正合计 %d 粒（原始检测 %d）\n耗时 %.1f 秒（引擎 %s，均 %.1f 秒/株）\n%s点击下方按钮保存编号图",
+                    sb.toString(), pans.size(), total, totalRaw,
+                    (System.currentTimeMillis() - t0) / 1000.0, lastEngine,
+                    (System.currentTimeMillis() - t0) / 1000.0 / Math.max(1, pans.size()),
+                    detail.toString());
             runOnUiThread(new Runnable() {
                 public void run() {
                     resultText.setText(msg);
@@ -405,17 +410,47 @@ public class MainActivity extends Activity {
                 public void run() { resultText.setText("分析失败: " + em + "\n（已记录，可在重开 App 后看到详情）"); }
             });
         } finally {
-            if (sess != null) { try { sess.close(); } catch (Throwable ignore) { } }
+            // 会话常驻复用（下次分析不再重新加载）；离开前台时在 onStop 里释放
+            System.gc();
         }
     }
 
-    /** 按需创建推理会话 */
+    /** 创建推理会话（尝试 XNNPACK 移动端加速，失败回退 CPU） */
     private OrtSession createSession() throws Exception {
         if (env == null) env = OrtEnvironment.getEnvironment();
         OrtSession.SessionOptions opt = new OrtSession.SessionOptions();
         opt.setIntraOpNumThreads(Math.max(2, Runtime.getRuntime().availableProcessors() - 1));
+        opt.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT);
+        String eng = "CPU";
+        try {
+            opt.addXnnpack(new java.util.HashMap<String, String>());
+            eng = "XNNPACK";
+        } catch (Throwable t) {
+            eng = "CPU";
+        }
+        lastEngine = eng;
         byte[] model = PanicleCounter.readAssetBytes(getAssets(), "GrainNuber.onnx");
         return env.createSession(model, opt);
+    }
+
+    /** 取会话：首次创建后常驻，避免每次分析都重新加载模型 */
+    private synchronized OrtSession getSession() throws Exception {
+        if (session == null) session = createSession();
+        return session;
+    }
+
+    private synchronized void closeSession() {
+        if (session != null) {
+            try { session.close(); } catch (Throwable ignore) { }
+            session = null;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // 离开前台（例如去拍照）就释放模型内存，回来再按需加载
+        closeSession();
     }
 
     /** 全屏放大查看结果图（双指缩放 / 拖动 / 双击） */

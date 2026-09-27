@@ -18,7 +18,7 @@
 | 形态 | 适合谁 | 获取方式 |
 |------|--------|----------|
 | **Windows 免安装 exe** | 批量处理扫描图/照片（本机无 Python 也能跑） | 见 [Releases](../../releases) 的 `panicle-grain-counter-v2-windows-x64.exe` |
-| **Android App (APK)** | 手机拍照即数、现场用 | 见 Releases 的 `panicle-grain-counter-v2.6-android-arm64.apk` |
+| **Android App (APK)** | 手机拍照即数、现场用 | 见 Releases 的 `panicle-grain-counter-v2.8-android-arm64.apk` |
 | **源码** | 要改算法/重标定/集成 | 本仓库 |
 
 **两个二进制的输出都包含**：逐穗粒数 CSV、整图标注、单穗检测框图、**逐粒编号图**（每粒一个框 + 序号，顶栏 `检测N / 校正M`）。
