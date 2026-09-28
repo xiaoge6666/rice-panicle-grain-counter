@@ -46,6 +46,7 @@ public class MainActivity extends Activity {
     private ImageView resultImage;
     private TextView zoomHint;
     private Button saveBtn;
+    private Button zoomBtn;
     private Uri photoUri;
     private Bitmap annotated;          // 最近一次结果图
     private final List<String> lastLog = new ArrayList<>();
@@ -126,6 +127,15 @@ public class MainActivity extends Activity {
             public void onClick(View v) { saveToGallery(); }
         });
         layout.addView(saveBtn);
+
+        zoomBtn = new Button(this);
+        zoomBtn.setText("🔍 放大查看结果图（双指缩放/拖动/双击）");
+        zoomBtn.setTextSize(16);
+        zoomBtn.setEnabled(false);
+        zoomBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) { showZoom(); }
+        });
+        layout.addView(zoomBtn);
 
         resultImage = new ImageView(this);
         resultImage.setAdjustViewBounds(true);
@@ -249,6 +259,7 @@ public class MainActivity extends Activity {
                 public void run() {
                     resultImage.setImageBitmap(null);
                     saveBtn.setEnabled(false);
+                    zoomBtn.setEnabled(false);
                     resultText.setText("正在分析...（大图约 10~60 秒）");
                     if (old != null && !old.isRecycled()) { try { old.recycle(); } catch (Throwable ignore) { } }
                 }
@@ -393,6 +404,7 @@ public class MainActivity extends Activity {
                     resultText.setText(msg);
                     resultImage.setImageBitmap(annotated);
                     saveBtn.setEnabled(true);
+                    zoomBtn.setEnabled(true);
                 }
             });
         } catch (Throwable e) {
